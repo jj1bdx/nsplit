@@ -17,7 +17,7 @@
 %% note: npmap/3 only depends on
 %% map_sublist_call/7 and yield_check/2
 
--spec(npmap/3 :: (non_neg_integer(),function(),[T]) -> [T]).
+-spec npmap(non_neg_integer(),function(),[T]) -> [T].
 
 npmap(N, F, L) when is_integer(N), N > 0, is_function(F), is_list(L) ->
     Len = length(L),
@@ -35,10 +35,9 @@ npmap(N, F, L) ->
 %% idea of this code imported from
 %% Erlang/OTP R12B5 lib/kernel/src/rpc.erl check/3
 
--spec(map_sublist_call/7 :: 
-      ([T],function(),
+-spec map_sublist_call([T],function(),
        non_neg_integer(),non_neg_integer(),integer(),
-       [T],[T]) -> [pid()]).
+       [T],[T]) -> [pid()].
 					    
 map_sublist_call([],_,_,_,_,_,_) -> [];
 map_sublist_call(ArgList,Fun,Rcnt,Slen,Srem,[],Orignodes) ->
@@ -56,7 +55,7 @@ map_sublist_call(ArgList,Fun,Rcnt,Slen,Srem,[Node|MoreNodes],Orignodes) ->
 %% idea of checking imported from
 %% Erlang/OTP R12B5 lib/kernel/src/rpc.erl check/3
 
--spec(yield_check/1 :: (pid()) -> any()).
+-spec yield_check(pid()) -> any().
 
 yield_check(K) ->
     case rpc:yield(K) of
