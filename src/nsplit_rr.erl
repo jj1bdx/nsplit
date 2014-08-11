@@ -23,20 +23,21 @@
 %% Written by Kenji Rikitake <kenji.rikitake@acm.org>
 %% See the end of this file for the license details.
 
-%% Version history: 
+%% Version history:
 %%     4-JUN-2008 0.1 alpha release
-%%     9-JUN-2008 0.2 alpha release: 
+%%     9-JUN-2008 0.2 alpha release:
 %%         pmap and npmap reversed result bug fixed
 %%         list_nsplit_reversed/2 added
 
 -module(nsplit_rr).
 -export([pmap/2, npmap/3, list_nsplit/2]).
--compile(export_all).
 
 %% pmap(function, list) -> list
 %% spawn parallel processes to map(function, list)
 %% using rpc:parallel_eval and apply/2
 %% note: erlang:apply/2 accepts args of (function, [args])
+
+-spec pmap(function(), list()) -> list().
 
 pmap(F, L) ->
     lists:reverse(check(rpc:parallel_eval(
@@ -44,9 +45,11 @@ pmap(F, L) ->
 
 %% npmap(integer, function, list) -> list
 %% spawn N processes to map(function, list)
-%% note: rpc:parallel_eval wants 
+%% note: rpc:parallel_eval wants
 %% a list of {module, function, [arg1, arg2,...]} tuples
 %% note 2: rpc:parallel_eval arguments reversed; check/2 reverses them back
+
+-spec npmap(non_neg_integer(), function(), list()) -> list().
 
 npmap(N, F, L) ->
     check(lists:append(rpc:parallel_eval(
@@ -59,6 +62,8 @@ npmap(N, F, L) ->
 %% WARNING: the result list is REVERSEd, so the result must be reversed back
 %% by list:reverse().
 
+-spec check(list(), list()) -> list().
+
 check([{badrpc, _}|_], _) -> exit(badrpc);
 check([X|T], Ack) -> check(T, [X|Ack]);
 check([], Ack) -> Ack.
@@ -67,30 +72,38 @@ check([], Ack) -> Ack.
 %% list_nsplit(3, [a,b,c,d,e,f,g]) ->
 %%    [[a,b,c],[d,e],[f,g]]
 
+-spec list_nsplit(non_neg_integer(), list()) -> list().
+
 list_nsplit(N, L) ->
     lists:reverse(lists:map(fun lists:reverse/1,list_nsplit_rev_rev(N, L))).
-       
+
 %% split a list into N- and (N+1)-element lists
 %% but the result list is REVERSEd
 %% list_nsplit(3, [a,b,c,d,e,f,g]) ->
 %%    [[g,f],[e,d],[c,b,a]]
 
+-spec list_nsplit_rev_rev(non_neg_integer(), list()) -> list().
+
 list_nsplit_rev_rev(N, L) ->
     {R, []} = getnumsandrevsplit(lengthlist(length(L), N), [], L),
     R.
 
-%% getnumsandsplit(list_of_integers, list of list, list) -> {list, list}
-%% getnumsandsplit([1,2,3], [], [a,b,c,d,e,f]) -> 
+%% getnumsandrevsplit(list_of_integers, list of list, list) -> {list, list}
+%% getnumsandrevsplit([1,2,3], [], [a,b,c,d,e,f]) ->
 %%    {[[f,e,d],[c,b],[a]], []}
+
+-spec getnumsandrevsplit([integer()], [list()], list()) -> {list(), list()}.
 
 getnumsandrevsplit([], H, T) -> {H, T};
 getnumsandrevsplit([N|Ntail], H, T) ->
     {NH, NT} = getrevheadandleft(N, H, T),
     getnumsandrevsplit(Ntail, NH, NT).
 
-%% getheadandleft(integer, list of list, list) -> {list, list}
-%% getheadandleft(4, [[c,b,a]], [1,2,3,4,5,6]) ->
+%% getrevheadandleft(integer, list of list, list) -> {list, list}
+%% getrevheadandleft(4, [[c,b,a]], [1,2,3,4,5,6]) ->
 %%    {[[4,3,2,1],[c,b,a]], [5,6]}
+
+-spec getrevheadandleft(non_neg_integer(), [list()], list()) -> {list(), list()}.
 
 getrevheadandleft(_, L, []) -> {L, []};
 getrevheadandleft(0, L, R) -> {L, R};
@@ -106,6 +119,8 @@ getrevheadandleft(N, L, R) ->
 %% revheadandtail(4, [c,b,a], [1,2,3,4,5,6]) ->
 %%    {[4,3,2,1,c,b,a], [5,6]}
 
+-spec revheadandtail(non_neg_integer(), list(), list()) -> {list(), list()}.
+
 revheadandtail(0, L, R) ->
     {L, R};
 revheadandtail(N, L, [H|T]) ->
@@ -116,6 +131,8 @@ revheadandtail(_, _, []) ->
 %% lengthlist(integer, integer) -> list
 %% lengthlist(22, 4) -> [5, 5, 4, 4, 4]
 
+-spec lengthlist(integer(), integer()) -> list().
+
 lengthlist(Len,N) ->
     E = Len div N,
     D = Len rem N,
@@ -125,7 +142,7 @@ lengthlist(Len,N) ->
 
 %% License details:
 %%
-%% The code written by Kenji Rikitake 
+%% The code written by Kenji Rikitake
 %% (of all functions and declarations except for check/2)
 %% is subject to the Creative Commons BSD License.
 %% http://creativecommons.org/licenses/BSD/
@@ -140,12 +157,12 @@ lengthlist(Len,N) ->
 %% compliance with the License. You should have received a copy of the
 %% Erlang Public License along with this software. If not, it can be
 %% retrieved via the world wide web at http://www.erlang.org/.
-%% 
+%%
 %% Software distributed under the License is distributed on an "AS IS"
 %% basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See
 %% the License for the specific language governing rights and limitations
 %% under the License.
-%% 
+%%
 %% The Initial Developer of the Original Code is Ericsson Utvecklings AB.
 %% Portions created by Ericsson are Copyright 1999, Ericsson Utvecklings
 %% AB. All Rights Reserved.''

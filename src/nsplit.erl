@@ -60,10 +60,10 @@ map_sublist_call([],_,_,_,_,_,_) -> [];
 map_sublist_call(ArgList,Fun,Rcnt,Slen,Srem,[],Orignodes) ->
     map_sublist_call(ArgList,Fun,Rcnt,Slen,Srem,Orignodes,Orignodes); 
 map_sublist_call(ArgList,Fun,Rcnt,Slen,Srem,[Node|MoreNodes],Orignodes) ->
-    case Rcnt > Srem of
-	true -> SL = Slen;
-	false -> SL = Slen + 1
-    end,
+    SL = case Rcnt > Srem of
+	        true -> Slen;
+	        false -> Slen + 1
+         end,
     {ArgSub, ArgTail} = lists:split(SL, ArgList),
     [rpc:async_call(Node, lists, map, [Fun, ArgSub]) | 
      map_sublist_call(ArgTail,Fun,Rcnt-1,Slen,Srem,MoreNodes,Orignodes)].
