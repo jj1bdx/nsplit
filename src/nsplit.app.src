@@ -1,0 +1,8 @@
+{application, tinymt, [
+    {description, "nsplit"},
+    {vsn, "0.4.1"},
+    {env, []},
+    {registered, []},
+    {modules, [npmap, nsplit, nsplit_rr]},
+    {applications, [kernel, stdlib]}
+]}.
