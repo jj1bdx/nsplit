@@ -75,7 +75,7 @@ map_sublist_call(ArgList,Fun,Rcnt,Slen,Srem,[Node|MoreNodes],Orignodes) ->
 %% idea of checking imported from
 %% Erlang/OTP R12B5 lib/kernel/src/rpc.erl check/3
 
--spec yield_check(pid()) -> any().
+-spec yield_check(rpc:key()) -> any().
 
 yield_check(K) ->
     case rpc:yield(K) of
